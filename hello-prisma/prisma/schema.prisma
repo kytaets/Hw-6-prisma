@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id            Int     @id @default(autoincrement())
+  email         String  @unique
+  nickname      String
+  information   PersonalInformation?
+  games         Game[]
+  purchases     Purchases[]
+  achievements  GamerAchievements[]   
+}
+
+model PersonalInformation {
+  id            Int         @id @default(autoincrement())
+  name          String? 
+  phoneNumber   String?
+  country       String?
+  city          String?
+  profileId     Int         @unique
+  person        Profile     @relation(fields: [profileId], references: [id])
+}
+
+model Game {
+  id          Int         @id @default(autoincrement())
+  title       String
+  gameHours  Int?
+  played      Boolean     @default(false)
+  gamerId     Int
+  gamer       Profile     @relation(fields: [gamerId], references: [id])
+}
+
+model Purchases  {
+  id          Int         @id @default(autoincrement())
+  name        String
+  amount      Float
+  date        DateTime    @default(now())
+  gamerId     Int
+  gamer       Profile     @relation(fields: [gamerId], references: [id])
+
+}
+
+model Achievements {
+  id          Int         @id @default(autoincrement())
+  title       String   
+  gamer       GamerAchievements[]   
+}
+
+model GamerAchievements {
+  gamerId         Int
+  achievementId   Int
+  gamer           Profile         @relation(fields: [gamerId], references: [id])
+  achievement     Achievements    @relation(fields: [achievementId], references: [id])
+  @@id([gamerId,achievementId])
+}
+
